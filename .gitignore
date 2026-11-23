@@ -7,3 +7,4 @@ Thumbs.db
 *.log
 .uv-cache/
 probe*.mjs
+data-plugins/
