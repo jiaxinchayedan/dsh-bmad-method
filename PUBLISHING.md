@@ -162,8 +162,27 @@ npm 包的 `repository` 必须指回同一个 GitHub 仓库，否则两者不会
 | 项 | 状态 |
 | --- | --- |
 | 代码、测试、许可证、三方声明 | ✅ 完成 |
-| git 仓库与首次提交 | ✅ 完成（`af00846`） |
+| git 仓库与首次提交 | ✅ 完成 |
 | 发布清单修正（private / peer / keywords / files） | ✅ 完成 |
 | 条目 YAML 与 PR 描述生成脚本 | ✅ 完成 |
-| **GitHub 仓库** | ⏳ 待建（缺 GitHub 用户名 + token） |
-| **收录 PR** | ⏳ 待提（依赖上一步） |
+| **GitHub 仓库** | ✅ https://github.com/jiaxinchayedan/dsh-bmad-method |
+| **收录 PR** | ✅ https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/pull/18075 |
+
+### 已经做过的验证
+
+- 从 GitHub **全新克隆**后 `pnpm install` + 跑测试：19/19 通过
+- 克隆后 90 个 skill 齐全，`.gitattributes` 生效（SKILL.md 仍是 LF，未被改写成 CRLF）
+- 公开访问：仓库页与 PR 页均 HTTP 200（不带 token）
+- 条目自检 17 项全过：`dsh.bundle` 就位、版本精确 SemVer、非 private、`dsh-plugin` topic、
+  描述里"90 skills / 7 modules / 4 tools"逐个对着代码核过
+- PR 只改 1 个文件（+6 行），符合"只改自己那一条"的规则
+- 榜单 CI 前 15 步（含 `awesome-lint`、README 一致性、路径与 npm 身份检查）全部 success
+
+### 剩下的就是等
+
+CI 的 `Build (locale parity, date derivation, templates)` 一步在重建整个榜单站点
+（上万个条目），耗时较长；之后由维护者人工评审合并。合并后索引每天 03:17 UTC 重建，
+GitHub Pages 约 10 分钟生效，jsDelivr 最长 12 小时。
+
+**被要求改描述措辞是常态，不是拒绝。** 改完推到同一分支，留一条评论说明改了什么即可。
+
