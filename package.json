@@ -62,6 +62,15 @@
     "cordis"
   ],
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jiaxinchayedan/dsh-bmad-method.git"
+  },
+  "homepage": "https://github.com/jiaxinchayedan/dsh-bmad-method#readme",
+  "bugs": {
+    "url": "https://github.com/jiaxinchayedan/dsh-bmad-method/issues"
+  },
+  "author": "jiaxinchayedan",
   "scripts": {
     "test": "node test/plugin.test.js"
   }
