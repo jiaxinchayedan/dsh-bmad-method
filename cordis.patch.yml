@@ -1,0 +1,7 @@
+# BMad Method 的挂载行：一个控制面实例。
+# 它注册 bmad_status / bmad_install / bmad_modules_list / bmad_module_toggle 四个工具，
+# 并以 SkillProvider 的形式提供随包的 90 个 BMAD skill（按模块开关过滤）。
+- insert:
+    - id: bmad-method-project
+      name: dsh-bmad-method-project
+      config: {}

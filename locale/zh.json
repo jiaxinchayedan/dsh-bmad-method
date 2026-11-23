@@ -1,0 +1,47 @@
+{
+  "meta": {
+    "title": "BMad Method（项目级）",
+    "description": "把 BMad Method 6.12.4 的 90 个 skill 装进 dsh。每个项目自己的 _bmad/，模块逐个开关。"
+  },
+  "card": {
+    "title": "BMad 设置",
+    "subtitle": "安装位置、语言、产物目录、模块开关",
+    "install": "安装 / 更新运行时",
+    "installing": "正在安装…",
+    "refresh": "刷新状态",
+    "loading": "正在读取状态…",
+    "save": "保存",
+    "saving": "保存中…",
+    "discard": "放弃修改",
+    "reset": "已覆盖 · 恢复",
+    "modulesTitle": "模块开关",
+    "modulesHint": "只决定这个模块的 skill 参不参与 dsh（下一轮对话生效，不用重启），模块文件一个都不删",
+    "enabled": "启用",
+    "disabled": "已停用",
+    "notInstalled": "未安装",
+    "noToggle": "不可开关",
+    "projectRoot": "项目根",
+    "bmadDir": "安装位置",
+    "coreVersion": "核心版本",
+    "outputDir": "产物目录",
+    "uvOk": "uv 可用",
+    "uvMissing": "uv 不可用（脚本改用 python 直接跑）"
+  },
+  "fields": {
+    "userName": {
+      "label": "用户名",
+      "placeholder": "留空 = BMad",
+      "hint": "写进 BMad 核心配置的 user_name，它跟你对话时用这个名字"
+    },
+    "language": {
+      "label": "语言",
+      "placeholder": "简体中文",
+      "hint": "沟通 + 文档输出语言"
+    },
+    "outputFolder": {
+      "label": "产物目录",
+      "placeholder": "_bmad-output",
+      "hint": "相对项目根；PRD、故事、回顾都写到这里"
+    }
+  }
+}

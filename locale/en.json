@@ -1,0 +1,47 @@
+{
+  "meta": {
+    "title": "BMad Method (project-level)",
+    "description": "Brings BMad Method 6.12.4 and its 90 skills into dsh. One _bmad/ per project, with per-module switches."
+  },
+  "card": {
+    "title": "BMad settings",
+    "subtitle": "Install location, language, output folder, module switches",
+    "install": "Install / update runtime",
+    "installing": "Installing…",
+    "refresh": "Refresh status",
+    "loading": "Reading status…",
+    "save": "Save",
+    "saving": "Saving…",
+    "discard": "Discard changes",
+    "reset": "Overridden · reset",
+    "modulesTitle": "Modules",
+    "modulesHint": "Decides whether this module's skills take part in dsh (next turn, no restart). No files are deleted.",
+    "enabled": "Enabled",
+    "disabled": "Disabled",
+    "notInstalled": "Not installed",
+    "noToggle": "Fixed",
+    "projectRoot": "Project root",
+    "bmadDir": "Installed at",
+    "coreVersion": "Core version",
+    "outputDir": "Output folder",
+    "uvOk": "uv available",
+    "uvMissing": "uv unavailable (scripts run through python instead)"
+  },
+  "fields": {
+    "userName": {
+      "label": "User name",
+      "placeholder": "Blank = BMad",
+      "hint": "Written to BMad core config as user_name; agents address you by it"
+    },
+    "language": {
+      "label": "Language",
+      "placeholder": "Simplified Chinese",
+      "hint": "Communication and document output language"
+    },
+    "outputFolder": {
+      "label": "Output folder",
+      "placeholder": "_bmad-output",
+      "hint": "Relative to the project root; PRDs, stories and retros land here"
+    }
+  }
+}

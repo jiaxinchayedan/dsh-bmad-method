@@ -1,0 +1,68 @@
+{
+  "name": "dsh-bmad-method-project",
+  "version": "1.0.0",
+  "description": "BMad Method 6.12.4 for dsh: 90 skills and 7 modules, one _bmad/ per project, with per-module switches.",
+  "type": "module",
+  "main": "index.js",
+  "exports": {
+    ".": "./index.js",
+    "./client": "./client.js",
+    "./cordis.patch.yml": "./cordis.patch.yml",
+    "./locale/*.json": "./locale/*.json",
+    "./icon": "./icon.svg",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "index.js",
+    "client.js",
+    "lib",
+    "skills",
+    "bmad-home",
+    "cordis.patch.yml",
+    "locale",
+    "icon.svg",
+    "screenshots.json",
+    "README.md",
+    "LICENSE",
+    "THIRD-PARTY-NOTICES.md"
+  ],
+  "engines": {
+    "node": "^22.19.0 || >=24",
+    "dsh": ">=0.2.0-rc.1 <0.2.1 || >=0.2.1-rc.1 <0.2.2 || >=0.2.2-rc.1 <0.3.0-0"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "inject": [
+        "@deepseek-ai/dsh-client-ui-plugin-manager",
+        "@deepseek-ai/dsh-client-ui-settings"
+      ]
+    }
+  },
+  "dependencies": {
+    "bmad-method": "6.12.4",
+    "yaml": "^2.9.1"
+  },
+  "peerDependencies": {
+    "@deepseek-ai/schemastery": ">=3.18.0"
+  },
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "deepseek-harness",
+    "bmad",
+    "bmad-method",
+    "skills",
+    "workflow",
+    "prd",
+    "agile",
+    "cordis"
+  ],
+  "license": "MIT",
+  "scripts": {
+    "test": "node test/plugin.test.js"
+  }
+}
