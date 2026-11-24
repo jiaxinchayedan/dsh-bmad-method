@@ -1,0 +1,14 @@
+fix: locale/ 里只放语言包，翻译数据移到 lib/
+
+宿主把 package.json exports 里的 ./locale/*.json 全部当语言包解析，文件名必须是
+语言 id。上一版把 skill 翻译表放在 locale/skill-descriptions.zh.json，触发了：
+
+  包元信息错误：Plugin metadata for dsh-bmad-method-project:
+  Error: dsh-bmad-method-project/locale/skill-descriptions.zh.json
+  must use a language id as its filename
+
+那份表是 skill 清单用的数据，不是界面语言资源，已移到 lib/。locale/ 现在只剩
+en.json 与 zh.json，两者都带 meta.title / meta.description。
+
+新增测试守住这条约束：locale/ 下每个文件名必须是语言 id（不含点号），且必须
+带 meta.title / meta.description。同类错误不会再悄悄溜进去。

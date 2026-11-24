@@ -9,10 +9,11 @@
  */
 import assert from 'node:assert/strict'
 import { execFileSync } from 'node:child_process'
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import test from 'node:test'
+import { fileURLToPath } from 'node:url'
 
 import { apply, Config } from '../index.js'
 import { expandPlaceholders, BmadSkillProvider, bundledSkillsDir } from '../lib/skills.js'
@@ -341,7 +342,7 @@ test('skill 描述中文化：只显示中文，且不改上游文件', async ()
     )
 
     // 映射表覆盖率：目录名 → 中文，一条不缺
-    const zh = JSON.parse(readFileSync(new URL('../locale/skill-descriptions.zh.json', import.meta.url), 'utf8'))
+    const zh = JSON.parse(readFileSync(new URL('../lib/skill-descriptions.zh.json', import.meta.url), 'utf8'))
     assert.equal(Object.keys(zh).length, 90)
   } finally {
     rmSync(project, { recursive: true, force: true })
@@ -364,6 +365,30 @@ test('描述映射缺失时回退英文，不会出现空描述', async () => {
     }
   } finally {
     rmSync(project, { recursive: true, force: true })
+  }
+})
+
+test('locale/ 里只允许语言 id 作为文件名（否则宿主报包元信息错误）', () => {
+  // 宿主把 exports 里的 ./locale/*.json 当语言包解析，文件名必须是语言 id。
+  // 曾因为放了 skill-descriptions.zh.json 触发：
+  //   "must use a language id as its filename"
+  const dir = fileURLToPath(new URL('../locale', import.meta.url))
+  const files = readdirSync(dir).filter((f) => f.endsWith('.json'))
+  assert.ok(files.length > 0, 'locale 目录为空')
+  for (const file of files) {
+    const stem = file.replace(/\.json$/, '')
+    // 语言 id：zh / en / zh-CN / en-US 这类，不含点号
+    assert.match(
+      stem,
+      /^[a-z]{2,3}(-[A-Za-z0-9]{2,8})*$/,
+      `locale/${file} 的文件名不是语言 id（不能带 . 或额外描述）`,
+    )
+  }
+  // 语言包必须含 meta.title / meta.description，插件页才有可读标题
+  for (const file of files) {
+    const parsed = JSON.parse(readFileSync(join(dir, file), 'utf8'))
+    assert.equal(typeof parsed?.meta?.title, 'string', `${file} 缺 meta.title`)
+    assert.equal(typeof parsed?.meta?.description, 'string', `${file} 缺 meta.description`)
   }
 })
 
