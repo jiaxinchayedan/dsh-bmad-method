@@ -392,6 +392,63 @@ test('locale/ 里只允许语言 id 作为文件名（否则宿主报包元信�
   }
 })
 
+test('模块列表：名称与说明是中文，且不列出已弃用模块', async () => {
+  const project = tempProject()
+  try {
+    const { ctx, tools } = fakeCtx()
+    apply(ctx, {})
+    const status = await tools.get('bmad_project_status').execute({ projectRoot: project }, {})
+
+    // 已装模块的名称/说明必须是中文（注册表只有英文，不能用它覆盖中文）
+    const installed = status.modules.filter((m) => m.installed)
+    assert.ok(installed.length >= 2, '应至少有 core 与 bmm')
+    for (const m of installed) {
+      assert.match(m.name, /[\u4e00-\u9fff]/, `${m.code} 的名称不是中文：${m.name}`)
+      assert.match(m.description, /[\u4e00-\u9fff]/, `${m.code} 的说明不是中文：${m.description}`)
+    }
+
+    // 已弃用模块（automator / wds）不该以"未安装"出现——装也装不上，
+    // 列出来只会让人以为漏装了什么
+    const missing = status.modules.filter((m) => !m.installed)
+    assert.deepEqual(
+      missing.filter((m) => m.code === 'automator' || m.code === 'wds').map((m) => m.code),
+      [],
+      '已弃用模块不应出现在可安装列表里',
+    )
+    // 未安装的模块（如果有）也应该是中文
+    for (const m of missing) {
+      assert.match(m.description, /[\u4e00-\u9fff]/, `${m.code} 的说明不是中文`)
+    }
+  } finally {
+    rmSync(project, { recursive: true, force: true })
+  }
+})
+
+test('两个模块工具的输出字段足以渲染，不出现"未知 / undefined"', async () => {
+  const project = tempProject()
+  try {
+    const { ctx, tools } = fakeCtx()
+    apply(ctx, {})
+    const status = await tools.get('bmad_project_status').execute({ projectRoot: project }, {})
+    const list = await tools.get('bmad_project_modules_list').execute({ projectRoot: project }, {})
+
+    // 渲染层复用 renderStatus，会读这些字段；少一个就渲染成"未知 / undefined"
+    for (const key of ['coreVersion', 'bundledBmadVersion', 'outputDir', 'uv', 'bmadDir', 'projectRoot']) {
+      assert.ok(status[key] !== undefined && status[key] !== null, `bmad_project_status 缺 ${key}`)
+      assert.ok(list[key] !== undefined && list[key] !== null, `bmad_project_modules_list 缺 ${key}`)
+    }
+
+    // 实际渲染一遍，正文里不能出现 undefined
+    const rendered = tools.get('bmad_project_modules_list').output.render({}, list)
+    const text = rendered.map((b) => b.text).join('\n')
+    assert.equal(text.includes('undefined'), false, `渲染结果含 undefined：\n${text}`)
+    assert.equal(text.includes('核心版本：未知'), false, '核心版本没读出来')
+    assert.match(text, /核心版本：6\.12\.4/)
+  } finally {
+    rmSync(project, { recursive: true, force: true })
+  }
+})
+
 test('模块开关状态解析与序列化往返一致，core 不可停用', () => {
   assert.deepEqual([...parseDisabled('gds, tea ,,')], ['gds', 'tea'])
   assert.equal(serializeDisabled(new Set(['tea', 'gds'])), 'gds,tea')

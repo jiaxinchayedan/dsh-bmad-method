@@ -1,14 +1,15 @@
-fix: locale/ 里只放语言包，翻译数据移到 lib/
+fix: 模块名与说明改中文，不再列出已弃用模块
 
-宿主把 package.json exports 里的 ./locale/*.json 全部当语言包解析，文件名必须是
-语言 id。上一版把 skill 翻译表放在 locale/skill-descriptions.zh.json，触发了：
+设置卡片「模块开关」那一块原本是英文：名称取官方注册表的 name，说明取注册表的
+description，而注册表只有英文。中文兜底写在 MODULE_BLURB 里，却排在英文之后，
+永远轮不到。现在改成按 code 覆盖的 MODULE_LABELS 优先，注册表仅作回退
+（遇到注册表新增、我们还没翻译的模块时仍能显示英文，不会空白）。
 
-  包元信息错误：Plugin metadata for dsh-bmad-method-project:
-  Error: dsh-bmad-method-project/locale/skill-descriptions.zh.json
-  must use a language id as its filename
+同时不再把 automator 与 wds 列成「未安装」：两者在上游注册表里已标 deprecated，
+装也装不上，列出来只会让人以为漏装。已装但被标弃用的模块仍然列出并带 [已弃用]
+标记，老用户还能管理自己装过的。
 
-那份表是 skill 清单用的数据，不是界面语言资源，已移到 lib/。locale/ 现在只剩
-en.json 与 zh.json，两者都带 meta.title / meta.description。
-
-新增测试守住这条约束：locale/ 下每个文件名必须是语言 id（不含点号），且必须
-带 meta.title / meta.description。同类错误不会再悄悄溜进去。
+顺带修掉一个渲染缺陷：bmad_project_modules_list 的返回值漏了 coreVersion /
+bundledBmadVersion / outputDir / uv，而它复用 renderStatus 渲染，于是显示成
+「核心版本：未知」「产物目录：undefined」。新增测试比对两个工具的输出字段，
+并断言渲染结果里不出现 undefined。

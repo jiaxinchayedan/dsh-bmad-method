@@ -31,7 +31,7 @@ import {
   DEFAULT_LANGUAGE,
   DEFAULT_OUTPUT_FOLDER,
   INSTALLER_TOOLS,
-  MODULE_BLURB,
+  MODULE_LABELS,
   moduleRank,
 } from './lib/defaults.js'
 import { isInstalled, resolveProjectRoot } from './lib/paths.js'
@@ -149,10 +149,12 @@ function moduleView({ bmadDir, config, registryPath }) {
 
   const rows = installed.map((m) => {
     const reg = registryByCode.get(m.code)
+    const label = MODULE_LABELS[m.code]
     return {
       code: m.code,
-      name: reg?.name || m.name || m.code,
-      description: reg?.description || m.description || MODULE_BLURB[m.code] || '',
+      // 中文名优先：注册表只有英文，直接用会让卡片中英混杂
+      name: label?.name || reg?.name || m.name || m.code,
+      description: label?.description || reg?.description || m.description || '',
       version: m.version,
       source: m.source,
       installed: true,
@@ -163,19 +165,25 @@ function moduleView({ bmadDir, config, registryPath }) {
     }
   })
 
+  // 只列「可装的」：注册表里的已弃用模块（automator / wds）不再展示。
+  // 以前会把它们列成「未安装」，让人以为漏装了什么 —— 其实上游已经不再提供，
+  // 装也装不上。已装但被上游标为弃用的模块仍然列出（带 [已弃用] 标记），
+  // 这样老用户还能管理自己装过的模块。
   for (const entry of registryModules) {
     if (installedByCode.has(entry.code)) continue
     if ((entry.aliases ?? []).some((alias) => installedByCode.has(alias))) continue
+    if (entry.deprecated === true) continue
+    const label = MODULE_LABELS[entry.code]
     rows.push({
       code: entry.code,
-      name: entry.name,
-      description: entry.description || MODULE_BLURB[entry.code] || '',
+      name: label?.name || entry.name,
+      description: label?.description || entry.description || '',
       version: null,
       source: entry.type ?? 'module',
       installed: false,
       enabled: false,
       toggleable: false,
-      deprecated: entry.deprecated === true,
+      deprecated: false,
     })
   }
 
@@ -670,11 +678,16 @@ export function apply(ctx, config = {}) {
       },
       execute: async (args, exec) => {
         const status = await runStatus(args, exec, config)
-        // 与 bmad_project_status 区分：这里只给模块清单与所在位置，不带诊断细节
+        // 渲染层（renderModules）复用 renderStatus，所以这些字段一个都不能少：
+        // 少一个就会显示成「核心版本：未知 / 产物目录：undefined」。
         return {
           installed: status.installed,
           projectRoot: status.projectRoot,
           bmadDir: status.bmadDir,
+          coreVersion: status.coreVersion,
+          bundledBmadVersion: status.bundledBmadVersion,
+          outputDir: status.outputDir,
+          uv: status.uv,
           modules: status.modules,
           counts: status.counts,
           notes: status.notes,
