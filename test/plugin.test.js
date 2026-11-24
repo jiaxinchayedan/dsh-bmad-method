@@ -296,6 +296,77 @@ test('消解多模块同名键：固定保留 bmm，而不是"第一个出现的
   }
 })
 
+test('skill 描述中文化：只显示中文，且不改上游文件', async () => {
+  const project = tempProject()
+  try {
+    materializeProject(project, {})
+    const provider = new BmadSkillProvider({}, null, {
+      skillDir: bundledSkillsDir(),
+      getProjectRoot: () => project,
+      getDisabledModules: () => new Set(),
+    })
+    const { candidates } = await provider.list({ cwd: project })
+    assert.equal(candidates.length, 90)
+
+    // 每条描述都必须是纯中文（不再拼英文原文，避免列表变长）
+    const notChinese = candidates.filter((c) => !/[\u4e00-\u9fff]/.test(c.description))
+    assert.deepEqual(notChinese.map((c) => c.name), [], '这些 skill 的描述不是中文')
+
+    // 不能把英文原文接在后面。判据：出现「上游原句的特征片段」才算拼接失败。
+    // 不能用"含连续英文单词"——专有名词本身就是英文（BMAD Loop Skills、
+    // Agent Skill、ChatGPT 等），那是应该保留的。
+    const englishTail = candidates.filter((c) =>
+      /\b(Use when the user|Use when user|Use when invoked|Use when the user says)\b/i.test(c.description),
+    )
+    assert.deepEqual(
+      englishTail.map((c) => c.name),
+      [],
+      '这些描述里还留着英文原文的 "Use when..." 句子（本地化应只给中文）',
+    )
+
+    // 专有名词必须保留，否则中文用户看不到该找谁
+    const analyst = candidates.find((c) => c.name === 'bmad-agent-analyst')
+    assert.match(analyst.description, /Mary/)
+    const gdd = candidates.find((c) => c.name === 'gds-gdd')
+    assert.match(gdd.description, /GDD/)
+
+    // 关键：磁盘上的 SKILL.md 必须仍是英文原文（上游逐字节转发的前提）
+    const prdSkill = join(bundledSkillsDir(), 'bmad-prd', 'SKILL.md')
+    const disk = readFileSync(prdSkill, 'utf8')
+    assert.match(disk, /description: Create, update, or validate a PRD/)
+    assert.equal(
+      /[\u4e00-\u9fff]/.test(disk.split('\n').slice(0, 6).join('\n')),
+      false,
+      'SKILL.md frontmatter 被改成了中文，破坏了逐字节转发',
+    )
+
+    // 映射表覆盖率：目录名 → 中文，一条不缺
+    const zh = JSON.parse(readFileSync(new URL('../locale/skill-descriptions.zh.json', import.meta.url), 'utf8'))
+    assert.equal(Object.keys(zh).length, 90)
+  } finally {
+    rmSync(project, { recursive: true, force: true })
+  }
+})
+
+test('描述映射缺失时回退英文，不会出现空描述', async () => {
+  const project = tempProject()
+  try {
+    materializeProject(project, {})
+    const provider = new BmadSkillProvider({}, null, {
+      skillDir: bundledSkillsDir(),
+      getProjectRoot: () => project,
+      // 只留一个模块，影响的是过滤，不影响描述回退
+      getDisabledModules: () => new Set(),
+    })
+    const { candidates } = await provider.list({ cwd: project })
+    for (const c of candidates) {
+      assert.ok(c.description.trim().length > 0, `${c.name} 描述为空`)
+    }
+  } finally {
+    rmSync(project, { recursive: true, force: true })
+  }
+})
+
 test('模块开关状态解析与序列化往返一致，core 不可停用', () => {
   assert.deepEqual([...parseDisabled('gds, tea ,,')], ['gds', 'tea'])
   assert.equal(serializeDisabled(new Set(['tea', 'gds'])), 'gds,tea')

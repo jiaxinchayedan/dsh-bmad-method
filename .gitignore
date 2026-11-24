@@ -8,3 +8,4 @@ Thumbs.db
 .uv-cache/
 probe*.mjs
 data-plugins/
+.descriptions.json
